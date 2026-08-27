@@ -3,8 +3,12 @@
 #include<unordered_map>
 int main()
 {
-	std::cout << " *************** welcome to filexplor **********************" << "\n";
-	std::filesystem::path folder = "folder";
+	std::cout << " *************** welcome to filexplor **********************" << "\n"
+		<< "enter the folder path : ";
+	std::string folderpath;
+	std::cin >> folderpath;
+	
+	std::filesystem::path folder = folderpath;
 
 	std::unordered_map<std::string, std::string> categories;
 	categories[".jpg"] = "Images";
