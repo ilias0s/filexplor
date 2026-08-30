@@ -1,6 +1,7 @@
 #include<iostream>
 #include<filesystem>
 #include<unordered_map>
+#include<vector>
 int main()
 {
 	std::cout << " *************** welcome to filexplor **********************" << "\n"
@@ -26,37 +27,37 @@ int main()
 	categories[".wav"] = "Audio";
 	int images = 0, docs = 0, code = 0, audio = 0, other = 0;
 
-	for (const auto& i : std::filesystem::directory_iterator(folder))
+	for (const auto& i : std::filesystem::recursive_directory_iterator(folder))
 	{
 		if (!i.is_regular_file())
 			continue;
-		std::string category = categories[i.path().extension().string()];
-		if (category == "Images")
-		{
-			images++;
-		}
-		else if (category == "Documents")
-		{
-			docs++;
-		}
-		else if (category == "Code")
-		{
-			code++;
-		}
-		else if (category == "Audio")
-		{
-			audio++;
-		}
-		else
-		{
-			other++;
-		}
+			std::string category = categories[i.path().extension().string()];
+			if (category == "Images")
+			{
+				images++;
+			}
+			else if (category == "Documents")
+			{
+				docs++;
+			}
+			else if (category == "Code")
+			{
+				code++;
+			}
+			else if (category == "Audio")
+			{
+				audio++;
+			}
+			else
+			{
+				other++;
+			}
 	}
 
 	int j=0;
 	std::string list[5] = { "images","docs","code","audio","other" };
 
-	for (const auto& i : {images,docs,code,audio,other })
+	for (const auto& i : { images,docs,code,audio,other })
 	{
 		if (i != 0)
 		{
@@ -65,37 +66,60 @@ int main()
 		j++;
 	}
 
-	for (const auto& i : std::filesystem::directory_iterator(folder))
+	std::vector <std::filesystem::path> v;
+
+	for (const auto& i : std::filesystem::recursive_directory_iterator(folder))
 	{
 		if (!i.is_regular_file())
-			continue;
-			std::string category = categories[i.path().extension().string()];
+		continue;
+		v.push_back(i.path());
+	}
 
+	for (const auto& i : v)
+	{
+			std::string category = categories[i.extension().string()];
+			std::filesystem::path target;
 			if (category == "Images")
 			{
-				std::filesystem::rename(i.path(), folder / "images" / i.path().filename());
+				target = folder / "images" / i.filename();
 			}
 			else if (category == "Documents")
 			{
-				std::filesystem::rename(i.path(), folder / "docs" / i.path().filename());
+				target =  folder / "docs" / i.filename();
 
 			}
 			else if (category == "Code")
 			{
-				std::filesystem::rename(i.path(), folder / "code" / i.path().filename());
+				target =  folder / "code" / i.filename();
 
 			}
 			else if (category == "Audio")
 			{
-				std::filesystem::rename(i.path(), folder / "audio" / i.path().filename());
+				target =  folder / "audio" / i.filename();
 
 			}
 			else
 			{
-				std::filesystem::rename(i.path(), folder / "other" / i.path().filename());
+				target = folder / "other" / i.filename();
 
 			}
+
+			if (i.parent_path() == target.parent_path())
+				continue;
+			std::filesystem::rename(i, target);
+
 	}
+	std::vector<std::filesystem::path> removelist;
+	for (const auto& i : std::filesystem::recursive_directory_iterator(folder))
+	{
+		if (std::filesystem::is_empty(i))
+		removelist.push_back(i.path());
+	}
+	for (const auto& i : removelist)
+	{
+		std::filesystem::remove_all(i);
+	}
+
 	//display :
 	std::cout << "*********************" << "\n"
 		<< "images : " << images << "\n" << "docs : " << docs << "\n" << "code : " << code << "\n"
