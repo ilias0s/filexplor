@@ -112,7 +112,7 @@ int main()
 	std::vector<std::filesystem::path> removelist;
 	for (const auto& i : std::filesystem::recursive_directory_iterator(folder))
 	{
-		if (std::filesystem::is_empty(i))
+		if (!i.is_regular_file() && std::filesystem::is_empty(i))
 		removelist.push_back(i.path());
 	}
 	for (const auto& i : removelist)
@@ -121,10 +121,43 @@ int main()
 	}
 
 	//display :
+	std::cout <<"files found : " << images + docs + code + audio + other << "\n";
 	std::cout << "*********************" << "\n"
 		<< "images : " << images << "\n" << "docs : " << docs << "\n" << "code : " << code << "\n"
 		<< "audio : " << audio << "\n" << "other : " << other << "\n";
-	
+	int userchoise;
+	std::string yesno;
 
+	do {
+		std::cout << "options : " << "\n" << "1 . show the all files with there paths " << "\n" << "2 . delete a file"
+			<< "\n" << "3 . create a new folder and put files you choose in it " << "\n";
+		std::cin >> userchoise;
+		if (userchoise == 1)
+		{
+			for (const auto& i : std::filesystem::recursive_directory_iterator(folder))
+			{
+				if (!i.is_regular_file())
+					continue;
+				std::cout << i.path() << "\n";
+			}
+		}
+		else if (userchoise == 2)
+		{
+			std::filesystem::path userpath;
+			std::string input;
+			std::cout << "enter file path : "<<"\n";
+			std::cin>>input;
+			userpath = input;
+			if (std::filesystem::exists(userpath))
+			{
+				std::filesystem::remove(userpath);
+				std::cout << "file deleted ";
+			}
+			else
+				std::cout << "\n" << "deleting failed";
+		}
+		std::cout << "do you wanna do something again enter yes or no  : ";
+		std::cin >> yesno;
+	} while (yesno == "yes");
 	return 0;
 }
